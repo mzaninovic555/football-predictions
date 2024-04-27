@@ -15,11 +15,11 @@ dataset = FootballDataset('./data/Result_4.csv')
 input_features = dataset.__getitem__(0)[0].size(dim=0)
 output_features = dataset.__getitem__(0)[1].size(dim=0)
 
-batch_size = 16
-epochs = 15
-learning_rate = 0.001
-dropout_rate = 0
-hidden_layer_size = floor(input_features * 1.5)
+batch_size = 32
+epochs = 30
+learning_rate = 0.005
+dropout_rate = 0.0
+hidden_layer_size = floor(input_features * 2)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Device: {device}")
 
@@ -31,7 +31,7 @@ class NeuralNetwork(nn.Module):
         super().__init__()
 
         self.relu = nn.ReLU()
-        self.relu = nn.LeakyReLU()
+        self.leaky_relu = nn.LeakyReLU()
         self.tanh = nn.Tanh()
         self.sigmoid = nn.Sigmoid()
         self.softmax = nn.Softmax(dim=1)
@@ -47,21 +47,33 @@ class NeuralNetwork(nn.Module):
                                 out_features=output_features)
 
     def forward(self, x):
+        # input
         x = self.l1(x)
+        # x = self.relu(x)
         # x = self.sigmoid(x)
-        # x = self.tanh(x)
-        x = self.relu(x)
-        # x = self.dropout(x)
+        x = self.tanh(x)
+        # x = self.leaky_relu(x)
+        x = self.dropout(x)
+
+        # hidden 1
         x = self.l2(x)
-#         x = self.sigmoid(x)
-#         x = self.tanh(x)
-        x = self.relu(x)
-#         x = self.dropout(x)
-#         x = self.l3(x)
-#         x = self.sigmoid(x)
-#         x = self.tanh(x)
 #         x = self.relu(x)
+#         x = self.sigmoid(x)
+        x = self.tanh(x)
+#         x = self.leaky_relu(x)
+        x = self.dropout(x)
+
+        # hidden 2
+        x = self.l3(x)
+#         x = self.relu(x)
+#         x = self.sigmoid(x)
+        x = self.tanh(x)
+#         x = self.relu(x)
+#         x = self.leaky_relu(x)
+
+        # output
         x = self.output(x)
+        # x = self.softmax(x)
         return x
 
 
@@ -71,12 +83,12 @@ def train():
 
     criterion = nn.CrossEntropyLoss()
     # criterion = nn.MSELoss()
-    # criterion = nn.BCEWithLogitsLoss()
 
-    optimizer = torch.optim.Adam(model.parameters())
-    # optimizer = torch.optim.Adamax(model.parameters(), lr=learning_rate)
+    # 61%
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+    # 60%
     # optimizer = torch.optim.NAdam(model.parameters(), lr=learning_rate)
-    # optimizer = torch.optim.Adadelta(model.parameters(), lr=learning_rate)
 
     total_correct = 0
     total_total = 0
@@ -111,10 +123,10 @@ def train():
             total += target.size(0)
             accuracy = (correct / total) * 100
 
-            writer.add_scalar("Accuracy", accuracy, epoch)
-
             total_correct += correct
             total_total += total
+
+            writer.add_scalar("Accuracy", accuracy, epoch)
 
             if (i + 1) % 100 == 0:
                 print(
