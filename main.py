@@ -16,9 +16,9 @@ input_features = dataset.__getitem__(0)[0].size(dim=0)
 output_features = dataset.__getitem__(0)[1].size(dim=0)
 
 batch_size = 32
-epochs = 30
+epochs = 50
 learning_rate = 0.003
-dropout_rate = 0.0
+dropout_rate = 0.25
 hidden_layer_size = floor(input_features * 2)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Device: {device}")
@@ -50,6 +50,11 @@ class NeuralNetwork(nn.Module):
             # hidden 3
             nn.Linear(hidden_layer_size, hidden_layer_size),
             self.hidden_func,
+            self.dropout,
+
+            # hidden 4
+            nn.Linear(hidden_layer_size, hidden_layer_size),
+            self.hidden_func,
 
             # output
             nn.Linear(hidden_layer_size, output_features)
@@ -64,13 +69,7 @@ def train():
     print(model)
 
     criterion = nn.CrossEntropyLoss()
-    # criterion = nn.MSELoss()
-
-    # 61%
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-
-    # 60%
-    # optimizer = torch.optim.NAdam(model.parameters(), lr=learning_rate)
 
     total_correct = 0
     total_total = 0
