@@ -17,7 +17,7 @@ output_features = dataset.__getitem__(0)[1].size(dim=0)
 
 batch_size = 32
 epochs = 30
-learning_rate = 0.005
+learning_rate = 0.003
 dropout_rate = 0.0
 hidden_layer_size = floor(input_features * 2)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -30,51 +30,33 @@ class NeuralNetwork(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.relu = nn.ReLU()
-        self.leaky_relu = nn.LeakyReLU()
-        self.tanh = nn.Tanh()
-        self.sigmoid = nn.Sigmoid()
-        self.softmax = nn.Softmax(dim=1)
+        self.hidden_func = nn.ReLU()
+        # self.hidden_func = nn.LeakyReLU()
+        # self.hidden_func = nn.Tanh()
+        # self.hidden_func = nn.Sigmoid()
 
         self.dropout = nn.Dropout(dropout_rate)
-        self.l1 = nn.Linear(in_features=input_features,
-                            out_features=hidden_layer_size)
-        self.l2 = nn.Linear(in_features=hidden_layer_size,
-                            out_features=hidden_layer_size)
-        self.l3 = nn.Linear(in_features=hidden_layer_size,
-                            out_features=hidden_layer_size)
-        self.output = nn.Linear(in_features=hidden_layer_size,
-                                out_features=output_features)
+
+        self.sequential = nn.Sequential(
+            # hidden 1
+            nn.Linear(input_features, hidden_layer_size),
+            self.hidden_func,
+
+            # hidden 2
+            nn.Linear(hidden_layer_size, hidden_layer_size),
+            self.hidden_func,
+            self.dropout,
+
+            # hidden 3
+            nn.Linear(hidden_layer_size, hidden_layer_size),
+            self.hidden_func,
+
+            # output
+            nn.Linear(hidden_layer_size, output_features)
+        )
 
     def forward(self, x):
-        # input
-        x = self.l1(x)
-        # x = self.relu(x)
-        # x = self.sigmoid(x)
-        x = self.tanh(x)
-        # x = self.leaky_relu(x)
-        x = self.dropout(x)
-
-        # hidden 1
-        x = self.l2(x)
-#         x = self.relu(x)
-#         x = self.sigmoid(x)
-        x = self.tanh(x)
-#         x = self.leaky_relu(x)
-        x = self.dropout(x)
-
-        # hidden 2
-        x = self.l3(x)
-#         x = self.relu(x)
-#         x = self.sigmoid(x)
-        x = self.tanh(x)
-#         x = self.relu(x)
-#         x = self.leaky_relu(x)
-
-        # output
-        x = self.output(x)
-        # x = self.softmax(x)
-        return x
+        return self.sequential(x)
 
 
 def train():
