@@ -10,31 +10,34 @@ from football_dataset import FootballDataset
 
 writer = SummaryWriter()
 
-dataset = FootballDataset('./data/Result_1.csv')
+dataset = FootballDataset('./data/onehotz.csv')
 
 input_features = dataset.__getitem__(0)[0].size(dim=0)
 output_features = dataset.__getitem__(0)[1].size(dim=0)
 
 batch_size = 32
-epochs = 50
+epochs = 60
 learning_rate = 0.003
 dropout_rate = 0.25
-hidden_layer_size = floor(input_features * 2)
+hidden_layer_size = floor(input_features * 16)
+hidden_layer_size2 = floor(input_features * 8)
+hidden_layer_size3 = floor(input_features * 4)
+hidden_layer_size4 = floor(input_features * 2)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Device: {device}")
 
 len_80 = int(len(dataset) * 0.8)
 len_20 = len(dataset) - len_80
 train, validation = torch.utils.data.random_split(dataset, [len_80, len_20])
-train_loader = DataLoader(train, batch_size=batch_size)
-validation_loader = DataLoader(validation, batch_size=batch_size)
+train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
+validation_loader = DataLoader(validation, batch_size=batch_size, shuffle=True)
 
 
 class NeuralNetwork(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.hidden_func = nn.ReLU()
+        self.activation_function = nn.ReLU()
         # self.hidden_func = nn.LeakyReLU()
         # self.hidden_func = nn.Tanh()
         # self.hidden_func = nn.Sigmoid()
@@ -44,24 +47,28 @@ class NeuralNetwork(nn.Module):
         self.sequential = nn.Sequential(
             # input
             nn.Linear(input_features, hidden_layer_size),
-            self.hidden_func,
+            nn.BatchNorm1d(hidden_layer_size2),
+            self.activation_function,
 
             # hidden 1
-            nn.Linear(hidden_layer_size, hidden_layer_size),
-            self.hidden_func,
+            nn.Linear(hidden_layer_size, hidden_layer_size2),
+            nn.BatchNorm1d(hidden_layer_size2),
+            self.activation_function,
             self.dropout,
 
             # hidden 2
-            nn.Linear(hidden_layer_size, hidden_layer_size),
-            self.hidden_func,
+            nn.Linear(hidden_layer_size2, hidden_layer_size3),
+            nn.BatchNorm1d(hidden_layer_size3),
+            self.activation_function,
             self.dropout,
 
             # hidden 3
-            nn.Linear(hidden_layer_size, hidden_layer_size),
-            self.hidden_func,
+            nn.Linear(hidden_layer_size3, hidden_layer_size4),
+            nn.BatchNorm1d(hidden_layer_size4),
+            self.activation_function,
 
             # output
-            nn.Linear(hidden_layer_size, output_features)
+            nn.Linear(hidden_layer_size4, output_features),
         )
 
     def forward(self, x):
@@ -72,7 +79,7 @@ def train():
     model = NeuralNetwork().to(device)
     print(model)
 
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     total_correct = 0
@@ -155,8 +162,8 @@ def train():
 
         if (i + 1) % 100 == 0:
             print(
-                'Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Accuracy: {}'.format(
-                    epoch + 1, epochs, i, len(validation_loader), loss.item(),
+                'Step [{}/{}], Loss: {:.4f}, Accuracy: {}'.format(
+                    i, len(validation_loader), loss.item(),
                     accuracy))
         i += 1
 

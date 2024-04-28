@@ -6,7 +6,8 @@ from torch.utils.data import Dataset
 class FootballDataset(Dataset):
     def __init__(self, csv_file):
         self.data = pd.read_csv(csv_file)
-        self.data.dropna(inplace=True)
+        # self.data.dropna(inplace=True)
+        self.data.fillna(0, inplace=True)
 
     def __len__(self):
         return len(self.data)
