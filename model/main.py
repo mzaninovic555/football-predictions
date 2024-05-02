@@ -10,15 +10,15 @@ from football_dataset import FootballDataset
 
 writer = SummaryWriter()
 
-dataset = FootballDataset('./data/onehotz.csv')
+dataset = FootballDataset('./data/dataset.csv')
 
 input_features = dataset.__getitem__(0)[0].size(dim=0)
 output_features = dataset.__getitem__(0)[1].size(dim=0)
 
-batch_size = 32
-epochs = 60
+batch_size = 64
+epochs = 80
 learning_rate = 0.003
-dropout_rate = 0.25
+dropout_rate = 0.5
 hidden_layer_size = floor(input_features * 16)
 hidden_layer_size2 = floor(input_features * 8)
 hidden_layer_size3 = floor(input_features * 4)
@@ -38,16 +38,12 @@ class NeuralNetwork(nn.Module):
         super().__init__()
 
         self.activation_function = nn.ReLU()
-        # self.hidden_func = nn.LeakyReLU()
-        # self.hidden_func = nn.Tanh()
-        # self.hidden_func = nn.Sigmoid()
 
         self.dropout = nn.Dropout(dropout_rate)
 
         self.sequential = nn.Sequential(
             # input
             nn.Linear(input_features, hidden_layer_size),
-            nn.BatchNorm1d(hidden_layer_size2),
             self.activation_function,
 
             # hidden 1
@@ -139,7 +135,6 @@ def train():
 
     model.eval()
 
-    i = 0
     valid_correct = 0
     valid_total = 0
     for data, target in validation_loader:
@@ -149,26 +144,14 @@ def train():
         # Get predictions
         output = model(data)
 
-        # Calculate loss
-        loss = criterion(output, target)
-
         predicted = torch.argmax(output, dim=1)
         predicted_one_hot = torch.nn.functional.one_hot(predicted,
                                                         num_classes=3)
 
         valid_correct += (predicted_one_hot == target).all(dim=1).sum()
         valid_total += target.size(0)
-        accuracy = (valid_correct / valid_total) * 100
 
-        if (i + 1) % 100 == 0:
-            print(
-                'Step [{}/{}], Loss: {:.4f}, Accuracy: {}'.format(
-                    i, len(validation_loader), loss.item(),
-                    accuracy))
-        i += 1
-
-    print(
-        f"Validation finished, total accuracy: {(valid_correct / valid_total) * 100}")
+    print(f"Validation finished, total accuracy: {(valid_correct / valid_total) * 100}")
 
 
 if __name__ == '__main__':
