@@ -1,7 +1,5 @@
 import torch
 
-from main import NeuralNetwork
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = torch.load(
     "./models/football_predictor_2024_04_27_18_57_29_model.pt").to(device)
@@ -55,4 +53,3 @@ predicted = torch.argmax(output, dim=0)
 predicted_one_hot = torch.nn.functional.one_hot(predicted,
                                                 num_classes=3)
 print(f"Prediction one_hot (home_win, draw, away_win): {predicted_one_hot}")
-
