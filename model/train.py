@@ -14,7 +14,7 @@ writer = SummaryWriter()
 dataset = FootballDataset('./data/dataset.csv')
 
 batch_size = 64
-epochs = 80
+epochs = 30
 learning_rate = 0.003
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -85,7 +85,7 @@ writer.close()
 now = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
 
 model_scripted = torch.jit.script(model)
-model_scripted.save(f'./models/football_predictor_{now}_dict.pt')
+model_scripted.save(f'./models/football_predictor_{now}.pt')
 
 # torch.save(model.state_dict(), f'./models/football_predictor_{now}_dict.pt')
 # torch.save(model, f'./models/football_predictor_{now}_model.pt')

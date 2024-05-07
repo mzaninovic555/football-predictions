@@ -20,13 +20,6 @@ class FootballDataset(Dataset):
                      "competition_type"],
             inplace=True)
         self.data.dropna(inplace=True)
-        # self.data.fillna(0, inplace=True)
-
-        # transform all except result columns
-        x_scaled = preprocessing.MinMaxScaler().fit_transform(self.data)
-
-        # concat scaled and result columns
-        self.data = pd.DataFrame(x_scaled)
 
     def __len__(self):
         return len(self.data)
@@ -36,4 +29,5 @@ class FootballDataset(Dataset):
         features = sample[:-3].values.astype(dtype=float)
         target = sample[-3:].values.astype(dtype=float)
 
-        return torch.tensor(features, dtype=torch.float32), torch.tensor(target, dtype=torch.float32)
+        return (torch.tensor(features, dtype=torch.float32),
+                torch.tensor(target, dtype=torch.float32))

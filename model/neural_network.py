@@ -4,10 +4,10 @@ from torch import nn
 
 input_features = 20
 output_features = 3
-dropout_rate = 0.5
-hidden_layer_size = floor(input_features * 16)
-hidden_layer_size2 = floor(input_features * 8)
-hidden_layer_size3 = floor(input_features * 4)
+dropout_rate = 0.2
+hidden_layer_size = floor(input_features * 2)
+hidden_layer_size2 = floor(input_features * 2)
+hidden_layer_size3 = floor(input_features * 2)
 hidden_layer_size4 = floor(input_features * 2)
 
 
@@ -26,19 +26,16 @@ class NeuralNetwork(nn.Module):
 
             # hidden 1
             nn.Linear(hidden_layer_size, hidden_layer_size2),
-            nn.BatchNorm1d(hidden_layer_size2),
             self.activation_function,
             self.dropout,
 
             # hidden 2
             nn.Linear(hidden_layer_size2, hidden_layer_size3),
-            nn.BatchNorm1d(hidden_layer_size3),
             self.activation_function,
             self.dropout,
 
             # hidden 3
             nn.Linear(hidden_layer_size3, hidden_layer_size4),
-            nn.BatchNorm1d(hidden_layer_size4),
             self.activation_function,
 
             # output
