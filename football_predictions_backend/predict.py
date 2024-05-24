@@ -4,7 +4,7 @@ import torch
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-model = torch.jit.load(f'{os.getcwd()}/models/football_predictor_2024_05_07_18_39_41.pt')
+model = torch.jit.load('./model/prediction_model.pt', map_location=device)
 model.eval()
 
 
